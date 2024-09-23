@@ -105,6 +105,22 @@ export function objectToPascal<T extends object>(obj: T): ObjectToPascal<T> {
   return convertObject(obj, toPascal);
 }
 
+export function toKebab<T extends string>(term: T): ToKebab<T> {
+  if (!/[a-zA-Z0-9]/.test(term)) {
+    return term as ToKebab<T>; // Return unchanged if only special characters
+  }
+  return term
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase() as ToKebab<T>;
+}
+
+export type ToKebab<S extends string> = S extends `${infer T}${infer U}`
+  ? U extends Uncapitalize<U>
+    ? `${Lowercase<T>}${ToKebab<U>}`
+    : `${Lowercase<T>}-${ToKebab<Uncapitalize<U>>}`
+  : S; // For simplicity, we're not implementing the full type-level transformation
+
 export type ToCamel<S extends string | number | symbol> = S extends string
   ? S extends `${infer Head}_${infer Tail}`
     ? `${ToCamel<Uncapitalize<Head>>}${Capitalize<ToCamel<Tail>>}`
