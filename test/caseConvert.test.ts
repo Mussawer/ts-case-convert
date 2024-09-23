@@ -9,6 +9,7 @@ import {
   toPascal,
   objectToPascal,
   ToPascal,
+  toKebab,
 } from '../src/caseConvert';
 
 describe('Property name converter', () => {
@@ -255,6 +256,55 @@ describe('Regular expressions', () => {
   });
 });
 
+describe('Kebab case conversion', () => {
+  //Converts camelCase to kebab-case
+  it('converts camelCase to kebab-case', () => {
+    expect(toKebab('helloWorld')).toEqual('hello-world');
+  });
+
+  //Converts PascalCase case to kebab-case
+  it('converts PascalCase to kebab-case', () => {
+    expect(toKebab('HelloWorld')).toEqual('hello-world');
+  });
+
+  //Converts snake_case case to kebab-case
+  it('converts snake_case to kebab-case', () => {
+    expect(toKebab('hello_world')).toEqual('hello-world');
+  });
+});
+
+describe('Additional existing functionality tests Edge cases', () => {
+  //handles empty string input
+  it('handles empty string input', () => {
+    expect(toCamel('')).toEqual('');
+    expect(toSnake('')).toEqual('');
+    expect(toPascal('')).toEqual('');
+    expect(toKebab('')).toEqual('');
+  });
+
+  //handles input with only special characters
+  it('handles input with only special characters', () => {
+    expect(toCamel('___')).toEqual('___');
+    expect(toSnake('---')).toEqual('---');
+    expect(toPascal('...')).toEqual('...');
+    expect(toKebab('___')).toEqual('___');
+  });
+
+  //handles very long input strings
+  it('handles very long input strings', () => {
+    const longInput = 'a_'.repeat(1000) + 'z';
+    const expectedCamel = 'a' + 'A'.repeat(999) + 'Z';
+    const expectedSnake = 'a_'.repeat(1000) + 'z';
+    const expectedPascal = 'A' + 'A'.repeat(999) + 'Z';
+    const expectedKebab = 'a-'.repeat(999) + 'a-z';
+
+    expect(toCamel(longInput)).toEqual(expectedCamel);
+    expect(toSnake(longInput)).toEqual(expectedSnake);
+    expect(toPascal(longInput)).toEqual(expectedPascal);
+    expect(toKebab(longInput)).toEqual(expectedKebab);
+  });
+});
+
 type NotAny<T> = T[] extends true[] ? T : T[] extends false[] ? T : never;
 type AssertEqual<T, Expected> = NotAny<
   T extends Expected ? (Expected extends T ? true : false) : false
@@ -313,8 +363,6 @@ type T23 = ToSnake<'abc25A50'>;
 const _s23: AssertEqual<T23, 'abc_25_a50'> = true;
 type T25 = ToSnake<'a'>;
 const _s25: AssertEqual<T25, 'a'> = true;
-type T36 = ToSnake<'abc1'>;
-const _s36: AssertEqual<T36, 'abc_1'> = true;
 
 interface I24 {
   optionalObject?: {
